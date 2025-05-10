@@ -1,55 +1,21 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-  <meta charset="UTF-8" />
+  <meta charset="UTF-8">
   <title>방 꾸미기</title>
-  <style>
-    #canvas {
-      width: 800px;
-      height: 500px;
-      border: 1px solid #aaa;
-      position: relative;
-      background-color: #f9f9f9;
-    }
-
-    .furniture {
-      position: absolute;
-      cursor: move;
-    }
-
-    .selected {
-      outline: 2px solid blue;
-    }
-
-    .shop-item {
-      width: 60px;
-      cursor: grab;
-      margin-right: 10px;
-    }
-
-    .control-panel {
-      margin-top: 10px;
-    }
-
-    .z-index-label {
-      display: block;
-      margin-top: 5px;
-    }
-  </style>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <h2>🛋️ 방 꾸미기</h2>
-
+  <h2>🛋 방 꾸미기 시뮬레이터 V.0.05</h2>
   <div id="canvas"></div>
 
-  <h3>🛒 보유 가구</h3>
-  <div id="shop"></div>
-
-  <div class="control-panel" id="control-panel" style="display: none;">
-    <label>선택된 가구: <span id="selected-name"></span></label>
-    <input type="range" id="z-index-slider" min="1" max="100" />
-    <span id="z-index-value"></span>
+  <div id="shop">
+    <h3>가구 목록</h3>
+    <div id="shop-items"></div>
   </div>
+
+  <button onclick="saveLayout()">💾 저장</button>
+  <button onclick="loadLayout()">🔄 불러오기</button>
 
   <script src="script.js"></script>
 </body>

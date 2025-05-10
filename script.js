@@ -1,113 +1,158 @@
 const canvas = document.getElementById("canvas");
-const shop = document.getElementById("shop");
-const controlPanel = document.getElementById("control-panel");
-const zSlider = document.getElementById("z-index-slider");
-const zValue = document.getElementById("z-index-value");
-const selectedName = document.getElementById("selected-name");
+const shopItemsContainer = document.getElementById("shop-items");
 
-let selectedFurniture = null;
-let userFurniture = {
-  sofa: 1,
-  desk: 1,
-  chair: 0 // 예시: 이건 0개니까 안 보이게
+let userId = new URLSearchParams(location.search).get("user") || "guest";
+let furnitureCounts = {
+  sofa: 2,
+  table: 1,
+  chair: 3
 };
 
-// 🛍️ 보유 가구만 목록에 표시
-for (const [name, count] of Object.entries(userFurniture)) {
-  if (count > 0) {
+let selectedItem = null;
+let furnitureIdCounter = 0;
+
+const GAS_URL = "https://script.google.com/macros/s/AKfycbwU8mzi1r-AGpQLipCX4D7OxaASypZqEAxhM4Q-QPniqDeBg1DWRo6yeWd2T3gmVnDBPQ/exec";
+
+function createShopItems() {
+  Object.entries(furnitureCounts).forEach(([name, count]) => {
+    if (count <= 0) return;
+
     const img = document.createElement("img");
     img.src = `assets/${name}.png`;
-    img.draggable = true;
     img.className = "shop-item";
+    img.draggable = true;
     img.dataset.name = name;
-    shop.appendChild(img);
+    img.title = `${name} (${count}개)`;
 
     img.addEventListener("dragstart", (e) => {
       e.dataTransfer.setData("furniture", name);
     });
-  }
+
+    shopItemsContainer.appendChild(img);
+  });
 }
 
-// 📦 가구 드롭
 canvas.addEventListener("dragover", (e) => e.preventDefault());
 
 canvas.addEventListener("drop", (e) => {
   e.preventDefault();
   const name = e.dataTransfer.getData("furniture");
-  if (userFurniture[name] <= 0) {
-    alert("해당 가구가 부족합니다!");
+
+  if (furnitureCounts[name] <= 0) {
+    alert("더 이상 배치할 수 없습니다.");
     return;
   }
 
-  const id = name + Date.now();
-  const img = document.createElement("img");
-  img.src = `assets/${name}.png`;
-  img.className = "furniture";
-  img.style.left = `${e.offsetX}px`;
-  img.style.top = `${e.offsetY}px`;
-  img.style.zIndex = 10;
-  img.id = id;
-  img.dataset.name = name;
-
-  canvas.appendChild(img);
-  userFurniture[name]--;
-
-  setupFurnitureEvents(img);
-  selectFurniture(img);
+  addFurniture(name, e.offsetX, e.offsetY);
+  furnitureCounts[name]--;
+  refreshShop();
 });
 
-// 🧲 클릭 시 가구 선택 및 zIndex 조절
-function setupFurnitureEvents(img) {
-  img.addEventListener("click", (e) => {
-    e.stopPropagation();
-    selectFurniture(img);
+function refreshShop() {
+  shopItemsContainer.innerHTML = "";
+  createShopItems();
+}
+
+function addFurniture(name, x, y) {
+  const id = `${name}-${++furnitureIdCounter}`;
+  const div = document.createElement("div");
+  div.className = "furniture";
+  div.id = id;
+  div.style.left = `${x}px`;
+  div.style.top = `${y}px`;
+  div.style.zIndex = 10;
+
+  const img = document.createElement("img");
+  img.src = `assets/${name}.png`;
+  img.className = "furniture-img";
+
+  const zSlider = document.createElement("input");
+  zSlider.type = "range";
+  zSlider.min = 1;
+  zSlider.max = 100;
+  zSlider.value = 10;
+  zSlider.addEventListener("input", () => {
+    div.style.zIndex = zSlider.value;
   });
 
-  // 드래그 이동
-  let offsetX, offsetY;
-  img.addEventListener("mousedown", (e) => {
-    e.preventDefault();
-    selectFurniture(img);
+  const flipBtn = document.createElement("button");
+  flipBtn.textContent = "좌우반전";
+  flipBtn.onclick = () => {
+    img.style.transform = img.style.transform === "scaleX(-1)" ? "scaleX(1)" : "scaleX(-1)";
+  };
+
+  const delBtn = document.createElement("button");
+  delBtn.textContent = "삭제";
+  delBtn.onclick = () => {
+    div.remove();
+    furnitureCounts[name]++;
+    refreshShop();
+  };
+
+  div.appendChild(img);
+  div.appendChild(document.createElement("br"));
+  div.appendChild(zSlider);
+  div.appendChild(flipBtn);
+  div.appendChild(delBtn);
+
+  makeDraggable(div);
+  canvas.appendChild(div);
+}
+
+function makeDraggable(el) {
+  let offsetX = 0, offsetY = 0;
+
+  el.onmousedown = function (e) {
+    selectedItem = el;
     offsetX = e.offsetX;
     offsetY = e.offsetY;
 
-    function onMouseMove(moveEvent) {
-      img.style.left = `${moveEvent.pageX - canvas.offsetLeft - offsetX}px`;
-      img.style.top = `${moveEvent.pageY - canvas.offsetTop - offsetY}px`;
-    }
+    document.onmousemove = function (e) {
+      selectedItem.style.left = (e.pageX - canvas.offsetLeft - offsetX) + "px";
+      selectedItem.style.top = (e.pageY - canvas.offsetTop - offsetY) + "px";
+    };
 
-    function onMouseUp() {
-      document.removeEventListener("mousemove", onMouseMove);
-      document.removeEventListener("mouseup", onMouseUp);
-    }
+    document.onmouseup = function () {
+      document.onmousemove = null;
+      selectedItem = null;
+    };
+  };
+}
 
-    document.addEventListener("mousemove", onMouseMove);
-    document.addEventListener("mouseup", onMouseUp);
+function saveLayout() {
+  const furniture = Array.from(document.querySelectorAll(".furniture")).map(div => {
+    const name = div.id.split("-")[0];
+    const x = parseInt(div.style.left);
+    const y = parseInt(div.style.top);
+    const z = parseInt(div.style.zIndex);
+    const flipped = div.querySelector("img").style.transform === "scaleX(-1)";
+
+    return { name, x, y, z, flipped };
   });
+
+  fetch(GAS_URL, {
+    method: "POST",
+    body: JSON.stringify({ userId, layout: furniture })
+  }).then(res => res.text())
+    .then(msg => alert("저장 완료"));
 }
 
-// 🎯 선택 UI
-function selectFurniture(furniture) {
-  document.querySelectorAll(".furniture").forEach(f => f.classList.remove("selected"));
-  furniture.classList.add("selected");
-  selectedFurniture = furniture;
-  selectedName.textContent = furniture.dataset.name;
-  zSlider.value = furniture.style.zIndex || 10;
-  zValue.textContent = zSlider.value;
-  controlPanel.style.display = "block";
+function loadLayout() {
+  fetch(`${GAS_URL}?userId=${userId}`)
+    .then(res => res.json())
+    .then(data => {
+      data.layout.forEach(item => {
+        addFurniture(item.name, item.x, item.y);
+        const div = document.getElementById(`${item.name}-${furnitureIdCounter}`);
+        div.style.zIndex = item.z;
+        if (item.flipped) {
+          div.querySelector("img").style.transform = "scaleX(-1)";
+        }
+        furnitureCounts[item.name]--;
+      });
+      refreshShop();
+    });
 }
 
-// 🧭 Z-index 슬라이더 동기화
-zSlider.addEventListener("input", () => {
-  if (selectedFurniture) {
-    selectedFurniture.style.zIndex = zSlider.value;
-    zValue.textContent = zSlider.value;
-  }
-});
-
-// 🧼 캔버스 바깥 클릭 시 선택 해제
-document.body.addEventListener("click", () => {
-  selectedFurniture = null;
-  controlPanel.style.display = "none";
-  document.querySelectorAll(".furniture").forEach(f => f.classList.remove("selected"));
-});
+// 초기 실행
+createShopItems();
