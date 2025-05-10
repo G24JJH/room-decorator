@@ -1,7 +1,10 @@
 <!DOCTYPE html>
-<html>
+<html lang="ko">
 <head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>방 꾸미기</title>
+  <link rel="stylesheet" href="style.css">
   <style>
     #canvas {
       border: 1px solid #ccc;
@@ -25,50 +28,25 @@
       margin: 5px;
       cursor: grab;
     }
+    .furniture {
+      position: absolute;
+    }
+    .z-index-slider {
+      width: 100px;
+    }
   </style>
 </head>
 <body>
   <h1>🪑 방 꾸미기 시뮬레이터</h1>
+
   <div id="canvas"></div>
 
   <div id="shop">
     <h3>가구 목록</h3>
-    <img src="assets/test.png" class="shop-item" draggable="true" data-name="의자">
-    <img src="assets/desk.png" class="shop-item" draggable="true" data-name="책상1">
+    <img src="assets/sofa.png" class="shop-item" draggable="true" data-name="sofa">
+    <img src="assets/desk.png" class="shop-item" draggable="true" data-name="desk">
   </div>
 
-  <script>
-    const canvas = document.getElementById('canvas');
-    const shopItems = document.querySelectorAll('.shop-item');
-
-    shopItems.forEach(item => {
-      item.addEventListener('dragstart', (e) => {
-        e.dataTransfer.setData("furniture", e.target.src);
-      });
-    });
-
-    canvas.addEventListener('dragover', (e) => {
-      e.preventDefault();
-    });
-
-    canvas.addEventListener('drop', (e) => {
-      e.preventDefault();
-      const imgURL = e.dataTransfer.getData("furniture");
-      const img = document.createElement('img');
-      img.src = imgURL;
-      img.className = "item";
-      img.style.left = `${e.offsetX - 40}px`;
-      img.style.top = `${e.offsetY - 40}px`;
-
-      img.dataset.angle = 0;
-      img.addEventListener('click', () => {
-        let angle = (parseInt(img.dataset.angle) + 90) % 360;
-        img.style.transform = `rotate(${angle}deg)`;
-        img.dataset.angle = angle;
-      });
-
-      canvas.appendChild(img);
-    });
-  </script>
+  <script src="script.js"></script>
 </body>
 </html>
