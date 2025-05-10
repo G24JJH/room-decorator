@@ -1,16 +1,17 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-  <meta charset="UTF-8" />
-  <title>편집하기 V.0.03</title>
-  <link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8">
+  <title>방 꾸미기 시뮬레이터</title>
   <style>
+    body { font-family: sans-serif; }
     #canvas {
-      border: 1px solid #ccc;
+      border: 2px solid #ccc;
       width: 800px;
       height: 500px;
       position: relative;
       background: #f5f5f5;
+      overflow: hidden;
     }
     .item {
       width: 80px;
@@ -19,8 +20,11 @@
       cursor: move;
       transition: transform 0.2s;
     }
-    .item.selected {
-      outline: 2px dashed red;
+    .selected {
+      outline: 3px solid red;
+    }
+    #shop {
+      margin-top: 20px;
     }
     .shop-item {
       width: 60px;
@@ -29,109 +33,25 @@
     }
     .z-index-control {
       position: absolute;
-      bottom: -30px;
+      bottom: 0;
+      background: white;
+      width: 80px;
+      text-align: center;
+      font-size: 12px;
     }
   </style>
 </head>
 <body>
-  <h1>편집 시뮬레이터</h1>
-  <p id="selectedInfo"></p>
+  <h1>🪑 방 꾸미기 시뮬레이터 V.0.04</h1>
+  <p>선택한 가구: <span id="selected-info">없음</span></p>
+
   <div id="canvas"></div>
 
   <div id="shop">
     <h3>가구 목록</h3>
-    <div id="shopItems"></div>
+    <div id="shop-items"></div>
   </div>
 
-  <script>
-    const canvas = document.getElementById("canvas");
-    const shopItemsContainer = document.getElementById("shopItems");
-    const selectedInfo = document.getElementById("selectedInfo");
-
-    const furnitureCounts = {
-      sofa: 2,
-      desk: 1
-    };
-
-    const inventory = {
-      sofa: true,
-      desk: true
-    };
-
-    const images = {
-      sofa: "assets/test.png",
-      desk: "assets/desk.png"
-    };
-
-    for (const [name, count] of Object.entries(furnitureCounts)) {
-      if (!inventory[name]) continue;
-      const img = document.createElement("img");
-      img.src = images[name];
-      img.className = "shop-item";
-      img.draggable = true;
-      img.dataset.name = name;
-      img.title = `${name} (${count}개 남음)`;
-      img.addEventListener("dragstart", (e) => {
-        e.dataTransfer.setData("furniture", name);
-      });
-      shopItemsContainer.appendChild(img);
-    }
-
-    let selectedItem = null;
-
-    canvas.addEventListener("dragover", (e) => e.preventDefault());
-
-    canvas.addEventListener("drop", (e) => {
-      e.preventDefault();
-      const name = e.dataTransfer.getData("furniture");
-      if (furnitureCounts[name] <= 0) {
-        alert("이 가구는 더 이상 배치할 수 없습니다.");
-        return;
-      }
-      furnitureCounts[name]--;
-      const div = document.createElement("div");
-      div.className = "item";
-      div.style.left = `${e.offsetX - 40}px`;
-      div.style.top = `${e.offsetY - 40}px`;
-      div.style.zIndex = getNextZIndex();
-      div.dataset.name = name;
-
-      const img = document.createElement("img");
-      img.src = images[name];
-      img.width = 80;
-      img.height = 80;
-      div.appendChild(img);
-
-      const slider = document.createElement("input");
-      slider.type = "range";
-      slider.min = 1;
-      slider.max = 100;
-      slider.value = div.style.zIndex;
-      slider.className = "z-index-control";
-      slider.addEventListener("input", () => {
-        div.style.zIndex = slider.value;
-      });
-      div.appendChild(slider);
-
-      div.addEventListener("click", () => {
-        if (selectedItem) selectedItem.classList.remove("selected");
-        selectedItem = div;
-        div.classList.add("selected");
-        selectedInfo.textContent = `선택된 가구: ${name}, z-index: ${div.style.zIndex}`;
-      });
-
-      canvas.appendChild(div);
-    });
-
-    function getNextZIndex() {
-      const items = document.querySelectorAll(".item");
-      let max = 0;
-      items.forEach(item => {
-        const z = parseInt(item.style.zIndex) || 0;
-        if (z > max) max = z;
-      });
-      return max + 1;
-    }
-  </script>
+  <script src="script.js"></script>
 </body>
 </html>
