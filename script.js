@@ -3,14 +3,17 @@ const shop = document.getElementById('shop');
 let selectedItem = null;
 let furnitureList = {};
 let userId = getUserIdFromURL();
-const GAS_URL = 'https://script.google.com/macros/s/AKfycbxpzwYKwPNRCeLAWJ98W28Ox0Wx6tRW01fczXIPxpKhH5QfyjT4aeuBVpkz8xWJiv1OEw/exec';
+const GAS_URL = 'https://script.google.com/macros/s/AKfycbx9262w3aZ36nFlK1BxUATFe3IADscwtx0MUle4jxAXovOlDOUc-Z873Mu_d6aYcwi1BA/exec';
 
 window.onload = () => {
-  fetch(`https://script.google.com/macros/s/AKfycbxpzwYKwPNRCeLAWJ98W28Ox0Wx6tRW01fczXIPxpKhH5QfyjT4aeuBVpkz8xWJiv1OEw/exec?userId=${userId}&type=inventory`)
+  fetch(`${GAS_URL}?userId=${userId}&type=inventory`)
     .then(res => res.json())
     .then(data => {
       furnitureList = data.furniture;
       initializeShop(furnitureList);
+    })
+    .catch(err => {
+      console.error("가구 목록 불러오기 실패:", err);
     });
 };
 
