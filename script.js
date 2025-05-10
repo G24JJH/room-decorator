@@ -6,7 +6,7 @@ let userId = getUserIdFromURL();
 const GAS_URL = 'https://script.google.com/macros/s/AKfycbxpzwYKwPNRCeLAWJ98W28Ox0Wx6tRW01fczXIPxpKhH5QfyjT4aeuBVpkz8xWJiv1OEw/exec';
 
 window.onload = () => {
-  fetch(`${GAS_URL}?type=inventory&userId=${userId}`)
+  fetch(`https://script.google.com/macros/s/AKfycbxpzwYKwPNRCeLAWJ98W28Ox0Wx6tRW01fczXIPxpKhH5QfyjT4aeuBVpkz8xWJiv1OEw/exec?userId=${userId}&type=inventory`)
     .then(res => res.json())
     .then(data => {
       furnitureList = data.furniture;
