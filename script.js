@@ -1,5 +1,4 @@
 // --- script.js ---
-
 // 0) 기본 세팅
 const canvas    = new fabric.Canvas('c', { selection: false });
 const shop      = document.getElementById('shop');
@@ -7,38 +6,33 @@ const zSlider   = document.getElementById('zSlider');
 const deleteBtn = document.getElementById('deleteBtn');
 const saveBtn   = document.getElementById('saveBtn');
 const loadBtn   = document.getElementById('loadBtn');
-
-// 전역 flip 버튼 (controls 영역에 삽입)
-const flipBtn = document.createElement('button');
-flipBtn.id = 'flipBtn';
+// flip 버튼
+const flipBtn   = document.createElement('button');
+flipBtn.id      = 'flipBtn';
 flipBtn.textContent = '↔️ 반전';
-flipBtn.disabled = true;
+flipBtn.disabled  = true;
 document.getElementById('controls').appendChild(flipBtn);
 
 let activeObject = null;
 
-// 1) 상점 이미지 드래그 시작
+// 1) 상점 드래그 시작
 document.querySelectorAll('.shop-item').forEach(img => {
   img.addEventListener('dragstart', e => {
     e.dataTransfer.setData('name', img.dataset.name);
   });
 });
 
-// 2) 캔버스에 드롭하면 Fabric 이미지 추가
+// 2) 캔버스에 드롭 → 이미지 추가
 canvas.upperCanvasEl.addEventListener('dragover', e => e.preventDefault());
 canvas.upperCanvasEl.addEventListener('drop', e => {
   e.preventDefault();
   const name = e.dataTransfer.getData('name');
   const src  = `assets/${name}.png`;
-
   fabric.Image.fromURL(src, img => {
     img.set({
-      left: e.offsetX,
-      top:  e.offsetY,
-      selectable: true,
-      hasControls: true,
-      lockRotation: true,
-      lockUniScaling: false,
+      left: e.offsetX, top: e.offsetY,
+      selectable: true, hasControls: true,
+      lockRotation: true, lockUniScaling: false,
       data: { name, src }
     });
     canvas.add(img);
@@ -47,26 +41,30 @@ canvas.upperCanvasEl.addEventListener('drop', e => {
   });
 });
 
-// 3) 선택/해제 이벤트로 컨트롤 표시/숨김
-canvas.on('selection:created',  e => showControls(e.target));
-canvas.on('selection:updated',  e => showControls(e.target));
-canvas.on('before:selection:cleared', () => hideControls());
+// 3) 클릭 시 오브젝트 또는 배경 구분하여 컨트롤
+canvas.on('mouse:down', opts => {
+  if (opts.target) {
+    showControls(opts.target);
+  } else {
+    hideControls();
+  }
+});
 
+// showControls: 버튼 활성화 및 activeObject 설정
 function showControls(obj) {
   activeObject = obj;
-  // 컨트롤 핸들 모두 활성화
-  zSlider.disabled = false;
+  zSlider.disabled   = false;
   deleteBtn.disabled = false;
   flipBtn.disabled   = false;
-
-  // slider 값 세팅 (z-order)
+  // 슬라이더 값 세팅
   const idx = canvas.getObjects().indexOf(obj) + 1;
   zSlider.value = idx;
 }
 
+// hideControls: 버튼 비활성화
 function hideControls() {
   activeObject = null;
-  zSlider.disabled = true;
+  zSlider.disabled   = true;
   deleteBtn.disabled = true;
   flipBtn.disabled   = true;
 }
@@ -93,42 +91,43 @@ flipBtn.addEventListener('click', () => {
   canvas.renderAll();
 });
 
-// 7) 저장 → localStorage
+// 7) 저장 → localStorage (scaleX/scaleY 추가)
 saveBtn.addEventListener('click', () => {
   const data = canvas.getObjects().map(obj => ({
-    name: obj.data.name,
-    src:  obj.data.src,
-    left: obj.left,
-    top:  obj.top,
-    flip: obj.flipX || false,
-    z:    canvas.getObjects().indexOf(obj)
+    name:   obj.data.name,
+    src:    obj.data.src,
+    left:   obj.left,
+    top:    obj.top,
+    scaleX: obj.scaleX || 1,
+    scaleY: obj.scaleY || 1,
+    flip:   obj.flipX || false,
+    z:      canvas.getObjects().indexOf(obj)
   }));
   localStorage.setItem('roomLayout', JSON.stringify(data));
   alert('✅ 저장되었습니다!');
 });
 
-// 8) 불러오기 → localStorage
+// 8) 불러오기 → localStorage (크기/순서/반전 복원)
 loadBtn.addEventListener('click', () => {
   const raw = localStorage.getItem('roomLayout');
-  if (!raw) {
-    return alert('❌ 저장된 레이아웃이 없습니다.');
-  }
+  if (!raw) return alert('❌ 저장된 레이아웃이 없습니다.');
   const layout = JSON.parse(raw);
 
   canvas.clear();
   hideControls();
 
-  // 비동기 이미지 로드 → 순서 보장
   layout.forEach(item => {
     fabric.Image.fromURL(item.src, img => {
       img.set({
-        left:  item.left,
-        top:   item.top,
+        left: item.left,
+        top:  item.top,
+        scaleX: item.scaleX,
+        scaleY: item.scaleY,
+        flipX: item.flip,
         selectable: true,
         hasControls: true,
         lockRotation: true,
         lockUniScaling: false,
-        flipX: item.flip,
         data: { name: item.name, src: item.src }
       });
       canvas.add(img);
@@ -136,9 +135,4 @@ loadBtn.addEventListener('click', () => {
       canvas.renderAll();
     });
   });
-});
-
-// 9) 빈 공간 클릭 시 컨트롤 숨김
-canvas.on('mouse:down', opts => {
-  if (!opts.target) hideControls();
 });
