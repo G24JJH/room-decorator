@@ -3,46 +3,17 @@
 <head>
   <meta charset="UTF-8">
   <title>방 꾸미기</title>
-  <style>
-    #canvas {
-      width: 800px;
-      height: 500px;
-      border: 1px solid #ccc;
-      position: relative;
-      background-color: #f0f0f0;
-    }
-    .furniture {
-      position: absolute;
-      cursor: move;
-    }
-    .controls {
-      position: absolute;
-      top: -40px;
-      left: 0;
-      display: none;
-      background: white;
-      padding: 4px;
-      border: 1px solid #aaa;
-      z-index: 9999;
-    }
-    .shop-item {
-      width: 60px;
-      cursor: grab;
-      margin: 5px;
-    }
-  </style>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <h2>🪑 방 꾸미기 시뮬레이터 V.0.055</h2>
-
+  <h1>방 꾸미기 V.0.1.00</h1>
   <div id="canvas"></div>
-
-  <h3>🛒 가구 상점</h3>
+  <h3>가구 목록</h3>
   <div id="shop"></div>
-
-  <button onclick="saveRoom()">💾 저장</button>
-  <button onclick="loadRoom()">📂 불러오기</button>
-
+  <div>
+    <button id="saveBtn">저장</button>
+    <button id="loadBtn">불러오기</button>
+  </div>
   <script src="script.js"></script>
 </body>
 </html>
