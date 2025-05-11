@@ -3,8 +3,13 @@
 <head>
   <meta charset="UTF-8">
   <title>방 꾸미기</title>
+  <!-- Fabric.js -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/5.3.0/fabric.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/tabletop@1.5.4/src/tabletop.min.js"></script>
+  <!-- Tabletop.js (읽기 전용 Google Sheets) -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/tabletop.js/1.5.4/tabletop.min.js"></script>
+  <!-- 내 커스텀 스크립트 -->
+  <script src="script.js"></script>
+
   <style>
     #canvas-container { position: relative; }
     #c { border: 1px solid #ccc; }
@@ -26,6 +31,5 @@
     <button id="saveBtn">💾 저장</button>
     <button id="loadBtn">📂 불러오기</button>
   </div>
-  <script src="script.js"></script>
 </body>
 </html>
