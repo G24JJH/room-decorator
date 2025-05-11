@@ -3,7 +3,7 @@ const shop = document.getElementById('shop');
 let selectedItem = null;
 let furnitureList = {};
 let userId = getUserIdFromURL();
-const GAS_URL = 'https://script.google.com/macros/s/AKfycbx9262w3aZ36nFlK1BxUATFe3IADscwtx0MUle4jxAXovOlDOUc-Z873Mu_d6aYcwi1BA/exec';
+const GAS_URL = 'https://script.google.com/macros/s/AKfycbwEpDEOMbeZ6z5YHVvd-S2bgPmcT0zyRmNtPou-MxmFp0iOONUk09Ffim4QvJY1_LCzAA/exec';
 
 window.onload = () => {
   fetch(`${GAS_URL}?userId=${userId}&type=inventory`)
