@@ -36,9 +36,9 @@ canvas.upperCanvasEl.addEventListener('drop', e => {
       left: e.offsetX,
       top:  e.offsetY,
       selectable: true,
-      hasControls: false,
+      hasControls: true,
       lockRotation: true,
-      lockUniScaling: true,
+      lockUniScaling: false,
       data: { name, src }
     });
     canvas.add(img);
