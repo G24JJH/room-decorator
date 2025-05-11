@@ -127,7 +127,7 @@ loadBtn.addEventListener('click', () => {
         selectable: true,
         hasControls: true,
         lockRotation: true,
-        lockUniScaling: true,
+        lockUniScaling: false,
         flipX: item.flip,
         data: { name: item.name, src: item.src }
       });
