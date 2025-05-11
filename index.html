@@ -2,17 +2,28 @@
 <html lang="ko">
 <head>
   <meta charset="UTF-8">
-  <title>방 꾸미기</title>
-  <link rel="stylesheet" href="style.css">
+  <title>F방 꾸미기</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/5.3.0/fabric.min.js"></script>
+  <style>
+    #canvas-container { position: relative; }
+    #c { border: 1px solid #ccc; }
+    #shop { margin-top: 10px; }
+    .shop-item { width: 60px; cursor: grab; margin-right: 5px; }
+    #controls { margin-top: 10px; }
+    #controls input, #controls button { margin-right: 5px; }
+  </style>
 </head>
 <body>
-  <h1>방 꾸미기 V.0.1.00</h1>
-  <div id="canvas"></div>
-  <h3>가구 목록</h3>
-  <div id="shop"></div>
-  <div>
-    <button id="saveBtn">저장</button>
-    <button id="loadBtn">불러오기</button>
+  <h2>🪑 방 꾸미기 V.0.1.1</h2>
+  <div id="canvas-container">
+    <canvas id="c" width="800" height="500"></canvas>
+  </div>
+  <div id="shop"><h3>🛒 상점</h3></div>
+  <div id="controls">
+    <label>z-index: <input id="zSlider" type="range" min="1" max="100" value="10" disabled></label>
+    <button id="deleteBtn" disabled>삭제</button>
+    <button id="saveBtn">💾 저장</button>
+    <button id="loadBtn">📂 불러오기</button>
   </div>
   <script src="script.js"></script>
 </body>
