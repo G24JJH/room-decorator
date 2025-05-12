@@ -56,6 +56,15 @@
     <button id="loadBtn">📂 불러오기</button>
   </div>
 
+  <button id="authBtn">Google 권한 요청</button>
+  <script>
+    document.getElementById('authBtn').addEventListener('click', () => {
+      // 이미 토큰이 있으면 바로 리턴
+      if (accessToken) return;
+      tokenClient.requestAccessToken();
+    });
+  </script>
+
   <script src="script.js"></script>
 </body>
 </html>
