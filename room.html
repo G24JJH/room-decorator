@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <title>방 꾸미기</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/5.3.0/fabric.min.js"></script>
+  <style>
+    body { font-family: sans-serif; }
+    #canvas-container { position: relative; margin-bottom: 10px; }
+    #c { border: 1px solid #ccc; }
+    #shop { margin-bottom: 10px; }
+    .shop-item { width: 60px; cursor: grab; margin-right: 5px; }
+    #controls { margin-bottom: 10px; }
+    #controls input, #controls button { margin-right: 5px; }
+  </style>
+</head>
+<body>
+  <script>
+    // 로그인 체크
+    if (!localStorage.getItem('loginUser')) {
+      alert('로그인이 필요합니다!');
+      window.location.href = 'index.html';
+    }
+  </script>
+
+  <h2>🪑 방 꾸미기 시뮬레이터 V.0.2.5</h2>
+
+  <div id="canvas-container">
+    <canvas id="c" width="800" height="500"></canvas>
+  </div>
+
+  <div id="shop">
+    <h3>가구 목록</h3>
+    <img src="assets/sofa.png" class="shop-item" draggable="true" data-name="sofa">
+    <img src="assets/table.png" class="shop-item" draggable="true" data-name="table">
+  </div>
+
+  <div id="controls">
+    <label>z-index: <input id="zSlider" type="range" min="1" max="100" value="10" disabled></label>
+    <button id="deleteBtn" disabled>삭제</button>
+    <button id="saveBtn">💾 저장</button>
+    <button id="loadBtn">📂 불러오기</button>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
