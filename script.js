@@ -9,11 +9,25 @@ const loadBtn   = document.getElementById('loadBtn');
 // flip 버튼
 const flipBtn   = document.createElement('button');
 flipBtn.id      = 'flipBtn';
-flipBtn.textContent = '↔️ 반전!';
+flipBtn.textContent = '↔️ 반전';
 flipBtn.disabled  = true;
 document.getElementById('controls').appendChild(flipBtn);
 
 let activeObject = null;
+let gapiLoaded = false;
+
+function start() {
+  gapi.client.init({
+    apiKey: 'AIzaSyBYMvVkhdniX7glIF42vV6BdPzRwL0AJJQ',
+    discoveryDocs: ["https://sheets.googleapis.com/$discovery/rest?version=v4"],
+  }).then(() => {
+    gapiLoaded = true;  // API 로드 성공 후 true로 설정
+  }).catch(e => {
+    console.error("API 로드 실패:", e);
+  });
+}
+
+gapi.load('client', start);
 
 // 1) 상점 드래그 시작
 document.querySelectorAll('.shop-item').forEach(img => {
