@@ -1,5 +1,5 @@
 // --- script.js ---
-// V.0.2.88
+// V.0.2.9
 
 // 전역 변수
 let canvas;
@@ -103,6 +103,7 @@ window.addEventListener('DOMContentLoaded', () => {
     gapi.client.setToken({ access_token: accessToken });
 
     const userId = localStorage.getItem('userId');
+    console.log('save for userId=', userId);
     if (!userId) return alert('로그인이 필요합니다.');
 
     const data = canvas.getObjects().map(obj => ({ name: obj.data.name, src: obj.data.src, left: obj.left, top: obj.top, scaleX: obj.scaleX || 1, scaleY: obj.scaleY || 1, flip: obj.flipX || false, z: canvas.getObjects().indexOf(obj) }));
@@ -125,6 +126,7 @@ window.addEventListener('DOMContentLoaded', () => {
     gapi.client.setToken({ access_token: accessToken });
 
     const userId = localStorage.getItem('userId');
+    console.log('load for userId=', userId);
     if (!userId) return alert('로그인이 필요합니다.');
 
     gapi.client.sheets.spreadsheets.values.get({ spreadsheetId: '1xUDw_vkG2aS5KF0F50gGpSDgRMmdBZ2_pQc27D39_qQ', range: '룸!A2:D100' })
