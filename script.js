@@ -1,5 +1,5 @@
 // --- script.js ---
-// V.0.2.9
+// V.0.3.0
 
 // 전역 변수
 let canvas;
@@ -44,7 +44,7 @@ window.addEventListener('DOMContentLoaded', () => {
 
   // Fabric.js 셋업
   canvas = new fabric.Canvas('c', { selection: false });
-  const zSlider = document.getElementById('zSlider');
+  const zInput = document.getElementById('zIndex');
   const deleteBtn = document.getElementById('deleteBtn');
   const saveBtn = document.getElementById('saveBtn');
   const loadBtn = document.getElementById('loadBtn');
@@ -77,8 +77,11 @@ window.addEventListener('DOMContentLoaded', () => {
   canvas.on('mouse:down', opts => opts.target ? showControls(opts.target) : hideControls());
   function showControls(obj) {
     activeObject = obj;
-    zSlider.disabled = deleteBtn.disabled = flipBtn.disabled = false;
-    zSlider.value = canvas.getObjects().indexOf(obj) + 1;
+    deleteBtn.disabled = flipBtn.disabled = false;
+    // 현재 z-index 표시
+    const idx = canvas.getObjects().indexOf(obj) + 1;
+    zInput.disabled = false;
+    zInput.value = idx;
   }
   function hideControls() {
     activeObject = null;
@@ -86,9 +89,10 @@ window.addEventListener('DOMContentLoaded', () => {
   }
 
   // z-index
-  zSlider.addEventListener('input', () => {
+  zInput.addEventListener('change', () => {
     if (!activeObject) return;
-    canvas.moveTo(activeObject, parseInt(zSlider.value) - 1);
+    const newIndex = parseInt(zInput.value, 10) - 1;
+    canvas.moveTo(activeObject, newIndex);
     canvas.renderAll();
   });
 
