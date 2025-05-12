@@ -1,3 +1,19 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <title>방 꾸미기</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/5.3.0/fabric.min.js"></script>
+  <style>
+    body { font-family: sans-serif; }
+    #canvas-container { position: relative; margin-bottom: 10px; }
+    #c { border: 1px solid #ccc; }
+    #shop { margin-bottom: 10px; }
+    .shop-item { width: 60px; cursor: grab; margin-right: 5px; }
+    #controls { margin-bottom: 10px; }
+    #controls input, #controls button { margin-right: 5px; }
+  </style>
+</head>
 <body>
   <!-- 로그인 섹션 -->
   <div id="loginSection">
@@ -8,9 +24,9 @@
     <p id="loginStatus"></p>
   </div>
 
-  <!-- 메인 앱 (처음에는 숨김 처리됨) -->
+  <!-- 방 꾸미기 앱 -->
   <div id="app" style="display: none;">
-    <h2>🪑 방 꾸미기 시뮬레이터 V.0.2.4</h2>
+    <h2>🪑 방 꾸미기 시뮬레이터 V.0.2.5</h2>
 
     <div id="canvas-container">
       <canvas id="c" width="800" height="500"></canvas>
@@ -30,5 +46,126 @@
     </div>
   </div>
 
-  <script src="script.js"></script>
-</body>
+  <script>
+    // 로그인 로직
+    const loginSection = document.getElementById('loginSection');
+    const appSection = document.getElementById('app');
+    const loginBtn = document.getElementById('loginBtn');
+    const loginStatus = document.getElementById('loginStatus');
+
+    loginBtn.addEventListener('click', () => {
+      const id = document.getElementById('loginId').value;
+      const pw = document.getElementById('loginPw').value;
+
+      if (id === '1234' && pw === '1234') {
+        localStorage.setItem('userId', id);
+        loginSection.style.display = 'none';
+        appSection.style.display = 'block';
+      } else {
+        loginStatus.textContent = '❌ 로그인 실패. ID 또는 비밀번호가 잘못되었습니다.';
+        loginStatus.style.color = 'red';
+      }
+    });
+
+    // 자동 로그인 유지
+    window.addEventListener('DOMContentLoaded', () => {
+      if (localStorage.getItem('userId')) {
+        loginSection.style.display = 'none';
+        appSection.style.display = 'block';
+      }
+    });
+
+    // 방 꾸미기 로직
+    const canvas = new fabric.Canvas('c', { selection: false });
+    const zSlider = document.getElementById('zSlider');
+    const deleteBtn = document.getElementById('deleteBtn');
+    const saveBtn = document.getElementById('saveBtn');
+    const loadBtn = document.getElementById('loadBtn');
+    const flipBtn = document.createElement('button');
+    flipBtn.id = 'flipBtn';
+    flipBtn.textContent = '↔️ 반전';
+    flipBtn.disabled = true;
+    document.getElementById('controls').appendChild(flipBtn);
+
+    let activeObject = null;
+
+    document.querySelectorAll('.shop-item').forEach(img => {
+      img.addEventListener('dragstart', e => {
+        e.dataTransfer.setData('name', img.dataset.name);
+      });
+    });
+
+    canvas.upperCanvasEl.addEventListener('dragover', e => e.preventDefault());
+    canvas.upperCanvasEl.addEventListener('drop', e => {
+      e.preventDefault();
+      const name = e.dataTransfer.getData('name');
+      const src = `assets/${name}.png`;
+      fabric.Image.fromURL(src, img => {
+        img.set({
+          left: e.offsetX,
+          top: e.offsetY,
+          selectable: true,
+          hasControls: true,
+          lockRotation: true,
+          lockUniScaling: false,
+          data: { name, src }
+        });
+        canvas.add(img);
+        canvas.setActiveObject(img);
+        showControls(img);
+      });
+    });
+
+    canvas.on('mouse:down', opts => {
+      if (opts.target) {
+        showControls(opts.target);
+      } else {
+        hideControls();
+      }
+    });
+
+    function showControls(obj) {
+      activeObject = obj;
+      zSlider.disabled = false;
+      deleteBtn.disabled = false;
+      flipBtn.disabled = false;
+      zSlider.value = canvas.getObjects().indexOf(obj) + 1;
+    }
+
+    function hideControls() {
+      activeObject = null;
+      zSlider.disabled = true;
+      deleteBtn.disabled = true;
+      flipBtn.disabled = true;
+    }
+
+    zSlider.addEventListener('input', () => {
+      if (!activeObject) return;
+      canvas.moveTo(activeObject, parseInt(zSlider.value) - 1);
+      canvas.renderAll();
+    });
+
+    deleteBtn.addEventListener('click', () => {
+      if (!activeObject) return;
+      canvas.remove(activeObject);
+      hideControls();
+    });
+
+    flipBtn.addEventListener('click', () => {
+      if (!activeObject) return;
+      activeObject.toggle('flipX');
+      canvas.renderAll();
+    });
+
+    saveBtn.addEventListener('click', () => {
+      const data = canvas.getObjects().map(obj => ({
+        name: obj.data.name,
+        src: obj.data.src,
+        left: obj.left,
+        top: obj.top,
+        scaleX: obj.scaleX || 1,
+        scaleY: obj.scaleY || 1,
+        flip: obj.flipX || false,
+        z: canvas.getObjects().indexOf(obj)
+      }));
+      localStorage.setItem('roomLayout
