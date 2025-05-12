@@ -2,7 +2,7 @@
 <html lang="ko">
 <head>
   <meta charset="UTF-8">
-  <title>방 꾸미기 V.0.2.73</title>
+  <title>방 꾸미기 V.0.2.9</title>
   <script src="https://apis.google.com/js/api.js"></script>
   <script>
     let gapiLoaded = false;  // API 로딩 상태 추적
@@ -28,17 +28,17 @@
         alert('Google API가 로드되지 않았습니다!');
         return;
       }
-
+  
       const inputId = document.getElementById('id').value;
       const inputPassword = document.getElementById('password').value;
-
+  
       gapi.client.sheets.spreadsheets.values.get({
         spreadsheetId: '1xUDw_vkG2aS5KF0F50gGpSDgRMmdBZ2_pQc27D39_qQ',
         range: '룸!A2:F10',
       }).then(function(response) {
         const rows = response.result.values || [];
         let isValidUser = false;
-
+  
         for (let row of rows) {
           const [storedId, storedPassword] = row;
           if (inputId === storedId && inputPassword === storedPassword) {
@@ -46,8 +46,10 @@
             break;
           }
         }
-
+  
         if (isValidUser) {
+          // **여기서 저장**
+          localStorage.setItem('userId', inputId);
           alert('✅ 로그인 성공!');
           window.location.href = 'room.html';
         } else {
