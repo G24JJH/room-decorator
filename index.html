@@ -2,7 +2,7 @@
 <html lang="ko">
 <head>
   <meta charset="UTF-8">
-  <title>방 꾸미기 V.0.2.72</title>
+  <title>방 꾸미기 V.0.2.73</title>
   <script src="https://apis.google.com/js/api.js"></script>
   <script>
     let gapiLoaded = false;  // API 로딩 상태 추적
@@ -58,3 +58,17 @@
       });
     }
   </script>
+</head>
+<body>
+  <h2>방 꾸미기 - 로그인</h2>
+  <form onsubmit="event.preventDefault(); login();">
+    <label for="id">ID:</label>
+    <input type="text" id="id" required><br><br>
+    
+    <label for="password">Password:</label>
+    <input type="password" id="password" required><br><br>
+    
+    <button type="submit">로그인</button>
+  </form>
+</body>
+</html>
