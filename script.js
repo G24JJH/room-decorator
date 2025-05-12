@@ -1,4 +1,4 @@
-// --- script.js ---
+// --- script.js --- V.0.2.86
 
 // 0) 전역 변수 및 토큰 설정
 let canvas;
@@ -10,7 +10,7 @@ let tokenClient;
 // 1) Google API 및 GSI 초기화
 function gapiInit() {
   gapi.client.init({
-    apiKey: 'AIzaSyBYMvVkhdniX7glIF42vV6BdPzRwL0AJJQ',
+    apiKey: 'YOUR_API_KEY',
     discoveryDocs: ['https://sheets.googleapis.com/$discovery/rest?version=v4']
   }).then(() => {
     gapiInited = true;
@@ -20,12 +20,18 @@ function gapiInit() {
 
 function gisInit() {
   tokenClient = google.accounts.oauth2.initTokenClient({
-    client_id: '710863003277-ir6c0k7hl1rstsh6bb3pkkj8ddij9hih.apps.googleusercontent.com',
+    client_id: 'YOUR_OAUTH_CLIENT_ID.apps.googleusercontent.com',
     scope: 'https://www.googleapis.com/auth/spreadsheets',
+    redirect_uri: window.location.origin,  // origin 기반 리디렉트
     callback: (resp) => {
-      if (resp.error) {
-        console.error('Token error:', resp);
-      } else {
+      if (resp.error) console.error('Token error:', resp);
+      else {
+        accessToken = resp.access_token;
+        console.log('Access token acquired');
+      }
+    }
+  });
+} else {
         accessToken = resp.access_token;
         console.log('Access token acquired');
       }
