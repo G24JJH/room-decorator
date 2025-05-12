@@ -4,13 +4,34 @@ const canvas    = new fabric.Canvas('c', { selection: false });
 const shop      = document.getElementById('shop');
 const zSlider   = document.getElementById('zSlider');
 const deleteBtn = document.getElementById('deleteBtn');
-const saveBtn   = document.getElementById('saveBtn');
+const saveBtn = document.getElementById('saveBtn');
+if (saveBtn) {
+  saveBtn.addEventListener('click', () => {
+    const data = canvas.getObjects().map(obj => ({
+      name:   obj.data.name,
+      src:    obj.data.src,
+      left:   obj.left,
+      top:    obj.top,
+      scaleX: obj.scaleX || 1,
+      scaleY: obj.scaleY || 1,
+      flip:   obj.flipX || false,
+      z:      canvas.getObjects().indexOf(obj)
+    }));
+
+    const userId = localStorage.getItem('userId');
+    if (!userId) return alert('로그인이 필요합니다.');
+
+    saveLayoutToSheet(userId, data);  // ✅ 전달한 데이터로 저장
+    localStorage.setItem('roomLayout', JSON.stringify(data));
+    alert('✅ 저장되었습니다!');
+  });
+}
 const loadBtn   = document.getElementById('loadBtn');
 
 // flip 버튼
 const flipBtn   = document.createElement('button');
 flipBtn.id      = 'flipBtn';
-flipBtn.textContent = '↔️ 반전';
+flipBtn.textContent = '↔️ 반전!';
 flipBtn.disabled  = true;
 document.getElementById('controls').appendChild(flipBtn);
 
@@ -176,7 +197,7 @@ function saveLayoutToSheet(userId, data) {
   // 먼저 유저 ID가 위치한 행을 찾아야 함
   gapi.client.sheets.spreadsheets.values.get({
     spreadsheetId: '1xUDw_vkG2aS5KF0F50gGpSDgRMmdBZ2_pQc27D39_qQ',
-    range: '룸!A2:F10',
+    range: '룸!A1:F10',
   }).then(res => {
     const rows = res.result.values;
     const rowIndex = rows.findIndex(row => row[0] === userId);
@@ -205,7 +226,7 @@ function loadLayoutFromSheet(userId) {
 
   gapi.client.sheets.spreadsheets.values.get({
     spreadsheetId: '1xUDw_vkG2aS5KF0F50gGpSDgRMmdBZ2_pQc27D39_qQ',  // ✅ 진짜 스프레드시트 ID
-    range: '룸!A2:D10',
+    range: '룸!A1:D10',
   }).then(res => {
     const rows = res.result.values;
     const userRow = rows.find(row => row[0] === userId);
