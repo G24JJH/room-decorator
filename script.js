@@ -9,7 +9,7 @@ const loadBtn   = document.getElementById('loadBtn');
 // flip 버튼
 const flipBtn   = document.createElement('button');
 flipBtn.id      = 'flipBtn';
-flipBtn.textContent = '↔️ 반전';
+flipBtn.textContent = '↔️ 반전!';
 flipBtn.disabled  = true;
 document.getElementById('controls').appendChild(flipBtn);
 
@@ -103,38 +103,21 @@ saveBtn.addEventListener('click', () => {
     flip:   obj.flipX || false,
     z:      canvas.getObjects().indexOf(obj)
   }));
+
+  const userId = localStorage.getItem('userId');
+  if (!userId) return alert('로그인이 필요합니다.');
+
+  saveLayoutToSheet(userId, data);  // ✅ 전달한 데이터로 저장
   localStorage.setItem('roomLayout', JSON.stringify(data));
   alert('✅ 저장되었습니다!');
 });
 
+
 // 8) 불러오기 → localStorage (크기/순서/반전 복원)
 loadBtn.addEventListener('click', () => {
-  const raw = localStorage.getItem('roomLayout');
-  if (!raw) return alert('❌ 저장된 레이아웃이 없습니다.');
-  const layout = JSON.parse(raw);
-
-  canvas.clear();
-  hideControls();
-
-  layout.forEach(item => {
-    fabric.Image.fromURL(item.src, img => {
-      img.set({
-        left: item.left,
-        top:  item.top,
-        scaleX: item.scaleX,
-        scaleY: item.scaleY,
-        flipX: item.flip,
-        selectable: true,
-        hasControls: true,
-        lockRotation: true,
-        lockUniScaling: false,
-        data: { name: item.name, src: item.src }
-      });
-      canvas.add(img);
-      canvas.moveTo(img, item.z);
-      canvas.renderAll();
-    });
-  });
+  const userId = localStorage.getItem('userId');
+  if (!userId) return alert('❌ 로그인이 필요합니다.');
+  loadLayoutFromSheet(userId);  // ✅ 구글 시트에서 불러오기
 });
 
 // 로그인 제어
@@ -169,4 +152,96 @@ window.addEventListener('DOMContentLoaded', () => {
     appSection.style.display = 'block';
   }
 });
+
+function saveLayoutToSheet(userId) {
+  if (!gapiLoaded) return alert('Google API가 로드되지 않았습니다.');
+
+  const data = canvas.getObjects().map(obj => ({
+    name: obj.data.name,
+    src: obj.data.src,
+    left: obj.left,
+    top: obj.top,
+    scaleX: obj.scaleX || 1,
+    scaleY: obj.scaleY || 1,
+    flip: obj.flipX || false,
+    z: canvas.getObjects().indexOf(obj)
+  }));
+
+  const layoutJson = JSON.stringify(data);
+
+  // 먼저 유저 ID가 위치한 행을 찾아야 함
+  gapi.client.sheets.spreadsheets.values.get({
+    spreadsheetId: 'AIzaSyBYMvVkhdniX7glIF42vV6BdPzRwL0AJJQ',
+    range: '룸!A2:F10',
+  }).then(res => {
+    const rows = res.result.values;
+    const rowIndex = rows.findIndex(row => row[0] === userId);
+    if (rowIndex === -1) return alert('유저를 찾을 수 없습니다.');
+
+    const sheetRow = rowIndex + 2; // 실제 시트의 행 번호
+    const updateRange = `룸!D${sheetRow}`;  // D열에 저장
+
+    return gapi.client.sheets.spreadsheets.values.update({
+      spreadsheetId: '1xUDw_vkG2aS5KF0F50gGpSDgRMmdBZ2_pQc27D39_qQ',
+      range: updateRange,
+      valueInputOption: 'RAW',
+      resource: {
+        values: [[layoutJson]]
+      }
+    });
+  }).then(() => {
+    alert('✅ 구글 스프레드시트에 저장되었습니다.');
+  }).catch(err => {
+    console.error('스프레드시트 저장 실패:', err);
+  });
+}
+
+function loadLayoutFromSheet(userId) {
+  if (!gapiLoaded) return alert('Google API가 로드되지 않았습니다.');
+
+  gapi.client.sheets.spreadsheets.values.get({
+    spreadsheetId: '1xUDw_vkG2aS5KF0F50gGpSDgRMmdBZ2_pQc27D39_qQ',  // ✅ 진짜 스프레드시트 ID
+    range: '룸!A2:D10',
+  }).then(res => {
+    const rows = res.result.values;
+    const userRow = rows.find(row => row[0] === userId);
+
+    if (!userRow || !userRow[3]) return alert('❌ 저장된 배치가 없습니다.');
+
+    let layout;
+    try {
+      layout = JSON.parse(userRow[3]);
+    } catch (e) {
+      console.error('❌ JSON 파싱 오류:', e);
+      return alert('저장된 데이터 형식이 잘못되었습니다.');
+    }
+
+    canvas.clear();
+
+    layout.forEach(item => {
+      fabric.Image.fromURL(item.src, img => {
+        img.set({
+          left: item.left,
+          top: item.top,
+          scaleX: item.scaleX,
+          scaleY: item.scaleY,
+          flipX: item.flip,
+          selectable: true,
+          hasControls: true,
+          lockRotation: true,
+          lockUniScaling: false,
+          data: { name: item.name, src: item.src }
+        });
+        canvas.add(img);
+        canvas.moveTo(img, item.z);
+        canvas.renderAll();
+      });
+    });
+  }).catch(err => {
+    console.error('불러오기 실패:', err);
+    alert('❌ 구글 시트에서 불러오기에 실패했습니다.');
+  });
+}
+
+
 
