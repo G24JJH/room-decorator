@@ -2,63 +2,31 @@
 <html lang="ko">
 <head>
   <meta charset="UTF-8">
-  <title>방 꾸미기 로그인 테스트</title>
+  <title>로그인</title>
   <style>
-    body { font-family: sans-serif; margin: 20px; }
-    #app { display: none; }
-    .shop-item { width: 50px; margin-right: 10px; }
-    canvas { border: 1px solid #ccc; }
+    body { font-family: sans-serif; margin: 30px; }
+    input { margin: 5px; }
   </style>
 </head>
 <body>
-  <!-- 로그인 화면 -->
-  <div id="login">
-    <h2>🔐 로그인</h2>
-    <input type="text" id="idInput" placeholder="아이디"><br>
-    <input type="password" id="pwInput" placeholder="비밀번호"><br>
-    <button id="loginBtn">로그인</button>
-    <p id="loginMsg" style="color:red;"></p>
-  </div>
+  <h2>🔐 방 꾸미기 로그인 V.0.5.3</h2>
+  <input type="text" id="idInput" placeholder="ID"><br>
+  <input type="password" id="pwInput" placeholder="Password"><br>
+  <button id="loginBtn">로그인</button>
+  <p id="msg" style="color: red;"></p>
 
-  <!-- 앱 화면 -->
-  <div id="app">
-    <h2>🪑 방 꾸미기 시뮬레이터 V.0.2.51</h2>
-    <div id="shop">
-      <img src="https://via.placeholder.com/50x50?text=Sofa" class="shop-item" data-src="https://via.placeholder.com/50x50?text=Sofa">
-      <img src="https://via.placeholder.com/50x50?text=Table" class="shop-item" data-src="https://via.placeholder.com/50x50?text=Table">
-    </div>
-    <canvas id="canvas" width="500" height="300"></canvas>
-  </div>
-
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/5.3.0/fabric.min.js"></script>
   <script>
-    // 로그인 로직
-    const loginDiv = document.getElementById('login');
-    const appDiv = document.getElementById('app');
-    const loginBtn = document.getElementById('loginBtn');
-
-    loginBtn.addEventListener('click', () => {
+    document.getElementById('loginBtn').addEventListener('click', () => {
       const id = document.getElementById('idInput').value;
       const pw = document.getElementById('pwInput').value;
+
       if (id === '1234' && pw === '1234') {
-        loginDiv.style.display = 'none';
-        appDiv.style.display = 'block';
+        // 로그인 정보 저장 후 페이지 이동
+        localStorage.setItem('loginUser', id);
+        window.location.href = 'room.html';
       } else {
-        document.getElementById('loginMsg').textContent = '❌ ID 또는 비밀번호가 틀렸습니다.';
+        document.getElementById('msg').textContent = '❌ 아이디나 비밀번호가 틀렸습니다.';
       }
-    });
-
-    // 캔버스 로직
-    const canvas = new fabric.Canvas('canvas', { selection: false });
-
-    document.querySelectorAll('.shop-item').forEach(img => {
-      img.addEventListener('click', () => {
-        const src = img.dataset.src;
-        fabric.Image.fromURL(src, function(obj) {
-          obj.set({ left: 100, top: 100 });
-          canvas.add(obj);
-        });
-      });
     });
   </script>
 </body>
