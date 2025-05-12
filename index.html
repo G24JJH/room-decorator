@@ -2,9 +2,11 @@
 <html lang="ko">
 <head>
   <meta charset="UTF-8">
-  <title>방 꾸미기</title>
+  <title>방 꾸미기 - 로그인</title>
   <script src="https://apis.google.com/js/api.js"></script>
   <script>
+    let gapiLoaded = false;
+
     // 1. Google Sheets API 로딩 및 인증
     function start() {
       gapi.client.init({
@@ -12,26 +14,64 @@
         'clientId': '710863003277-k47blr6323j5n737pdtv5349o9qi3mig.apps.googleusercontent.com',  // OAuth 클라이언트 ID
         'scope': 'https://www.googleapis.com/auth/spreadsheets.readonly',
       }).then(function() {
-        // API 호출하여 시트 데이터를 불러오기
-        return gapi.client.sheets.spreadsheets.values.get({
-          spreadsheetId: '1xUDw_vkG2aS5KF0F50gGpSDgRMmdBZ2_pQc27D39_qQ',
-          range: '!A1:F10',  // 불러올 범위
-        });
-      }).then(function(response) {
-        const data = response.result.values;
-        console.log(data);  // 콘솔에서 확인
-        // 데이터를 화면에 표시할 수도 있음
+        gapiLoaded = true; // API가 준비된 상태로 플래그 설정
+        console.log("Google API 클라이언트가 로드되었습니다.");
       });
     }
 
     // 2. API 클라이언트 로드
     gapi.load('client:auth2', start);
+
+    // 3. 로그인 처리 함수
+    function login() {
+      if (!gapiLoaded) {
+        alert('Google API가 로드되지 않았습니다!');
+        return;
+      }
+
+      // 4. 로그인 폼에서 ID와 Password 가져오기
+      const inputId = document.getElementById('id').value;
+      const inputPassword = document.getElementById('password').value;
+
+      // 5. 구글 스프레드시트에서 ID와 Password 가져오기
+      gapi.client.sheets.spreadsheets.values.get({
+        spreadsheetId: '1xUDw_vkG2aS5KF0F50gGpSDgRMmdBZ2_pQc27D39_qQ', // 구글 스프레드시트 ID
+        range: '룸!A1:F10',  // A열과 B열 데이터 읽기 (A2부터)
+      }).then(function(response) {
+        const rows = response.result.values;
+        let isValidUser = false;
+
+        // 6. 스프레드시트에서 ID와 Password를 비교
+        for (let row of rows) {
+          const [storedId, storedPassword] = row;
+          if (inputId === storedId && inputPassword === storedPassword) {
+            isValidUser = true;
+            break;
+          }
+        }
+
+        // 7. 로그인 성공 or 실패 처리
+        if (isValidUser) {
+          alert('로그인 성공!');
+          // 방 꾸미기 페이지로 이동 (room.html)
+          window.location.href = 'room.html';
+        } else {
+          alert('로그인 실패! ID 또는 Password가 일치하지 않습니다.');
+        }
+      }).catch(function(error) {
+        console.error('Error: ' + error.result.error.message);
+      });
+    }
   </script>
 </head>
 <body>
-  <h2>방 꾸미기</h2>
-  <button onclick="gapi.auth2.getAuthInstance().signIn()">구글 로그인</button>
-  <button onclick="gapi.auth2.getAuthInstance().signOut()">로그아웃</button>
-  <div id="spreadsheet-data"></div>
+  <h2>방 꾸미기 - 로그인</h2>
+  <form onsubmit="event.preventDefault(); login();">
+    <label for="id">ID: </label>
+    <input type="text" id="id" required><br><br>
+    <label for="password">Password: </label>
+    <input type="password" id="password" required><br><br>
+    <button type="submit">로그인</button>
+  </form>
 </body>
 </html>
