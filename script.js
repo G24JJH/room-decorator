@@ -136,3 +136,26 @@ loadBtn.addEventListener('click', () => {
     });
   });
 });
+
+// --- 로그인 기능 ---
+const loginBtn = document.getElementById('loginBtn');
+const loginStatus = document.getElementById('loginStatus');
+
+loginBtn.addEventListener('click', () => {
+  const id = document.getElementById('loginId').value;
+  const pw = document.getElementById('loginPw').value;
+
+  if (id === '1234' && pw === '1234') {
+    localStorage.setItem('userId', id); // 로그인 상태 저장
+    loginStatus.textContent = `✅ 로그인 성공! 환영합니다, ${id}님`;
+    loginStatus.style.color = 'green';
+
+    // 로그인 성공 시 UI 조정
+    document.getElementById('loginId').disabled = true;
+    document.getElementById('loginPw').disabled = true;
+    loginBtn.disabled = true;
+  } else {
+    loginStatus.textContent = '❌ 로그인 실패. ID 또는 비밀번호가 잘못되었습니다.';
+    loginStatus.style.color = 'red';
+  }
+});
