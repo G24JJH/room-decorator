@@ -31,7 +31,7 @@ const loadBtn   = document.getElementById('loadBtn');
 // flip 버튼
 const flipBtn   = document.createElement('button');
 flipBtn.id      = 'flipBtn';
-flipBtn.textContent = '↔️ 반전!';
+flipBtn.textContent = '↔️ 반전';
 flipBtn.disabled  = true;
 document.getElementById('controls').appendChild(flipBtn);
 
@@ -41,14 +41,21 @@ let gapiLoaded = false;
 function start() {
   gapi.client.init({
     apiKey: 'AIzaSyBYMvVkhdniX7glIF42vV6BdPzRwL0AJJQ',
+    clientId: '710863003277-ir6c0k7hl1rstsh6bb3pkkj8ddij9hih.apps.googleusercontent.com',  // OAuth 클라이언트 ID
     discoveryDocs: ["https://sheets.googleapis.com/$discovery/rest?version=v4"],
+    scope: 'https://www.googleapis.com/auth/spreadsheets',  // 필요한 권한
   }).then(() => {
-    gapiLoaded = true;  // API 로드 성공 후 true로 설정
-    console.log("Google API loaded successfully.");
+    // 사용자 인증이 필요한 경우
+    gapi.auth2.getAuthInstance().signIn().then(() => {
+      console.log('Google API 인증 완료');
+      gapiLoaded = true; // 인증 완료 후 API 로드
+    });
   }).catch(e => {
     console.error("API 로드 실패:", e);
   });
 }
+
+gapi.load('client:auth2', start); // auth2 로드
 
 gapi.load('client', start);  // gapi 클라이언트 로드 시작
 
@@ -144,10 +151,10 @@ saveBtn.addEventListener('click', () => {
   const userId = localStorage.getItem('userId');
   if (!userId) return alert('로그인이 필요합니다.');
 
-  saveLayoutToSheet(userId, data);  // ✅ 전달한 데이터로 저장
-  localStorage.setItem('roomLayout', JSON.stringify(data));
-  alert('✅ 저장되었습니다!');
+  // 구글 시트 저장 후 alert 호출
+  saveLayoutToSheet(userId, data);  // ✅ 구글 시트에 저장
 });
+
 
 // 8) 불러오기 → localStorage (크기/순서/반전 복원)
 loadBtn.addEventListener('click', () => {
