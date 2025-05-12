@@ -6,6 +6,7 @@ const zSlider   = document.getElementById('zSlider');
 const deleteBtn = document.getElementById('deleteBtn');
 const saveBtn   = document.getElementById('saveBtn');
 const loadBtn   = document.getElementById('loadBtn');
+
 // flip 버튼
 const flipBtn   = document.createElement('button');
 flipBtn.id      = 'flipBtn';
@@ -22,12 +23,13 @@ function start() {
     discoveryDocs: ["https://sheets.googleapis.com/$discovery/rest?version=v4"],
   }).then(() => {
     gapiLoaded = true;  // API 로드 성공 후 true로 설정
+    console.log("Google API loaded successfully.");
   }).catch(e => {
     console.error("API 로드 실패:", e);
   });
 }
 
-gapi.load('client', start);
+gapi.load('client', start);  // gapi 클라이언트 로드 시작
 
 // 1) 상점 드래그 시작
 document.querySelectorAll('.shop-item').forEach(img => {
@@ -126,7 +128,6 @@ saveBtn.addEventListener('click', () => {
   alert('✅ 저장되었습니다!');
 });
 
-
 // 8) 불러오기 → localStorage (크기/순서/반전 복원)
 loadBtn.addEventListener('click', () => {
   const userId = localStorage.getItem('userId');
@@ -167,25 +168,14 @@ window.addEventListener('DOMContentLoaded', () => {
   }
 });
 
-function saveLayoutToSheet(userId) {
+function saveLayoutToSheet(userId, data) {
   if (!gapiLoaded) return alert('Google API가 로드되지 않았습니다.');
-
-  const data = canvas.getObjects().map(obj => ({
-    name: obj.data.name,
-    src: obj.data.src,
-    left: obj.left,
-    top: obj.top,
-    scaleX: obj.scaleX || 1,
-    scaleY: obj.scaleY || 1,
-    flip: obj.flipX || false,
-    z: canvas.getObjects().indexOf(obj)
-  }));
 
   const layoutJson = JSON.stringify(data);
 
   // 먼저 유저 ID가 위치한 행을 찾아야 함
   gapi.client.sheets.spreadsheets.values.get({
-    spreadsheetId: 'AIzaSyBYMvVkhdniX7glIF42vV6BdPzRwL0AJJQ',
+    spreadsheetId: '1xUDw_vkG2aS5KF0F50gGpSDgRMmdBZ2_pQc27D39_qQ',
     range: '룸!A2:F10',
   }).then(res => {
     const rows = res.result.values;
@@ -256,6 +246,3 @@ function loadLayoutFromSheet(userId) {
     alert('❌ 구글 시트에서 불러오기에 실패했습니다.');
   });
 }
-
-
-
