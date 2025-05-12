@@ -2,32 +2,36 @@
 <html lang="ko">
 <head>
   <meta charset="UTF-8">
-  <title>로그인</title>
-  <style>
-    body { font-family: sans-serif; margin: 30px; }
-    input { margin: 5px; }
-  </style>
+  <title>방 꾸미기</title>
+  <script src="https://apis.google.com/js/api.js"></script>
+  <script>
+    // 1. Google Sheets API 로딩 및 인증
+    function start() {
+      gapi.client.init({
+        'apiKey': 'AIzaSyBYMvVkhdniX7glIF42vV6BdPzRwL0AJJQ',  // 발급받은 API 키
+        'clientId': '710863003277-k47blr6323j5n737pdtv5349o9qi3mig.apps.googleusercontent.com',  // OAuth 클라이언트 ID
+        'scope': 'https://www.googleapis.com/auth/spreadsheets.readonly',
+      }).then(function() {
+        // API 호출하여 시트 데이터를 불러오기
+        return gapi.client.sheets.spreadsheets.values.get({
+          spreadsheetId: '1xUDw_vkG2aS5KF0F50gGpSDgRMmdBZ2_pQc27D39_qQ',
+          range: '!A1:F10',  // 불러올 범위
+        });
+      }).then(function(response) {
+        const data = response.result.values;
+        console.log(data);  // 콘솔에서 확인
+        // 데이터를 화면에 표시할 수도 있음
+      });
+    }
+
+    // 2. API 클라이언트 로드
+    gapi.load('client:auth2', start);
+  </script>
 </head>
 <body>
-  <h2>🔐 방 꾸미기 로그인 V.0.5.3</h2>
-  <input type="text" id="idInput" placeholder="ID"><br>
-  <input type="password" id="pwInput" placeholder="Password"><br>
-  <button id="loginBtn">로그인</button>
-  <p id="msg" style="color: red;"></p>
-
-  <script>
-    document.getElementById('loginBtn').addEventListener('click', () => {
-      const id = document.getElementById('idInput').value;
-      const pw = document.getElementById('pwInput').value;
-
-      if (id === '1234' && pw === '1234') {
-        // 로그인 정보 저장 후 페이지 이동
-        localStorage.setItem('loginUser', id);
-        window.location.href = 'room.html';
-      } else {
-        document.getElementById('msg').textContent = '❌ 아이디나 비밀번호가 틀렸습니다.';
-      }
-    });
-  </script>
+  <h2>방 꾸미기</h2>
+  <button onclick="gapi.auth2.getAuthInstance().signIn()">구글 로그인</button>
+  <button onclick="gapi.auth2.getAuthInstance().signOut()">로그아웃</button>
+  <div id="spreadsheet-data"></div>
 </body>
 </html>
