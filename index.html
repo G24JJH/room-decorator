@@ -5,7 +5,7 @@
   <title>방 꾸미기 - 로그인</title>
   <script src="https://apis.google.com/js/api.js"></script>
   <script>
-    let gapiLoaded = false;
+    let gapiLoaded = false;  // API 로딩 상태 추적
 
     // 1. Google Sheets API 로딩 및 인증
     function start() {
@@ -14,8 +14,10 @@
         'clientId': '710863003277-k47blr6323j5n737pdtv5349o9qi3mig.apps.googleusercontent.com',  // OAuth 클라이언트 ID
         'scope': 'https://www.googleapis.com/auth/spreadsheets.readonly',
       }).then(function() {
-        gapiLoaded = true; // API가 준비된 상태로 플래그 설정
+        gapiLoaded = true;  // API 로드 완료
         console.log("Google API 클라이언트가 로드되었습니다.");
+      }).catch(function(error) {
+        console.error('Google API 로드 실패:', error);
       });
     }
 
@@ -25,15 +27,15 @@
     // 3. 로그인 처리 함수
     function login() {
       if (!gapiLoaded) {
-        alert('Google API가 로드되지 않았습니다!');
+        alert('Google API가 로드되지 않았습니다!');  // API 로딩 확인
         return;
       }
 
-      // 4. 로그인 폼에서 ID와 Password 가져오기
+      // 로그인 폼에서 ID와 Password 가져오기
       const inputId = document.getElementById('id').value;
       const inputPassword = document.getElementById('password').value;
 
-      // 5. 구글 스프레드시트에서 ID와 Password 가져오기
+      // 4. 구글 스프레드시트에서 ID와 Password 가져오기
       gapi.client.sheets.spreadsheets.values.get({
         spreadsheetId: '1xUDw_vkG2aS5KF0F50gGpSDgRMmdBZ2_pQc27D39_qQ', // 구글 스프레드시트 ID
         range: '룸!A1:F10',  // A열과 B열 데이터 읽기 (A2부터)
@@ -41,7 +43,7 @@
         const rows = response.result.values;
         let isValidUser = false;
 
-        // 6. 스프레드시트에서 ID와 Password를 비교
+        // 5. 스프레드시트에서 ID와 Password를 비교
         for (let row of rows) {
           const [storedId, storedPassword] = row;
           if (inputId === storedId && inputPassword === storedPassword) {
@@ -50,7 +52,7 @@
           }
         }
 
-        // 7. 로그인 성공 or 실패 처리
+        // 6. 로그인 성공 or 실패 처리
         if (isValidUser) {
           alert('로그인 성공!');
           // 방 꾸미기 페이지로 이동 (room.html)
