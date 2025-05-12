@@ -2,7 +2,7 @@
 <html lang="ko">
 <head>
   <meta charset="UTF-8">
-  <title>방 꾸미기 V.0.2.7</title>
+  <title>방 꾸미기 V.0.2.71</title>
   <script src="https://apis.google.com/js/api.js"></script>
   <script>
     let gapiLoaded = false;  // API 로딩 상태 추적
@@ -11,7 +11,7 @@
     function start() {
       gapi.client.init({
         'apiKey': 'AIzaSyBYMvVkhdniX7glIF42vV6BdPzRwL0AJJQ',  // 발급받은 API 키
-        'clientId': '710863003277-ir6c0k7hl1rstsh6bb3pkkj8ddij9hih.apps.googleusercontent.com,  // OAuth 클라이언트 ID
+        'clientId': '710863003277-ir6c0k7hl1rstsh6bb3pkkj8ddij9hih.apps.googleusercontent.com',  // OAuth 클라이언트 ID
         'scope': 'https://www.googleapis.com/auth/spreadsheets.readonly',
       }).then(function() {
         gapiLoaded = true;  // API 로드 완료
@@ -24,26 +24,23 @@
     // 2. API 클라이언트 로드
     gapi.load('client:auth2', start);
 
-    // 3. 로그인 처리 함수
+    // 3. 로그인 함수
     function login() {
       if (!gapiLoaded) {
-        alert('Google API가 로드되지 않았습니다!');  // API 로딩 확인
+        alert('Google API가 로드되지 않았습니다!');
         return;
       }
 
-      // 로그인 폼에서 ID와 Password 가져오기
       const inputId = document.getElementById('id').value;
       const inputPassword = document.getElementById('password').value;
 
-      // 4. 구글 스프레드시트에서 ID와 Password 가져오기
       gapi.client.sheets.spreadsheets.values.get({
-        spreadsheetId: '1xUDw_vkG2aS5KF0F50gGpSDgRMmdBZ2_pQc27D39_qQ', // 구글 스프레드시트 ID
-        range: '룸!A1:F10',  // A열과 B열 데이터 읽기 (A2부터)
+        spreadsheetId: '1xUDw_vkG2aS5KF0F50gGpSDgRMmdBZ2_pQc27D39_qQ',
+        range: '룸!A2:F10',
       }).then(function(response) {
-        const rows = response.result.values;
+        const rows = response.result.values || [];
         let isValidUser = false;
 
-        // 5. 스프레드시트에서 ID와 Password를 비교
         for (let row of rows) {
           const [storedId, storedPassword] = row;
           if (inputId === storedId && inputPassword === storedPassword) {
@@ -52,28 +49,14 @@
           }
         }
 
-        // 6. 로그인 성공 or 실패 처리
         if (isValidUser) {
-          alert('로그인 성공!');
-          // 방 꾸미기 페이지로 이동 (room.html)
+          alert('✅ 로그인 성공!');
           window.location.href = 'room.html';
         } else {
-          alert('로그인 실패! ID 또는 Password가 일치하지 않습니다.');
+          alert('❌ 로그인 실패! ID 또는 Password가 틀렸습니다.');
         }
       }).catch(function(error) {
-        console.error('Error: ' + error.result.error.message);
+        console.error('스프레드시트 접근 오류:', error);
       });
     }
   </script>
-</head>
-<body>
-  <h2>방 꾸미기 - 로그인</h2>
-  <form onsubmit="event.preventDefault(); login();">
-    <label for="id">ID: </label>
-    <input type="text" id="id" required><br><br>
-    <label for="password">Password: </label>
-    <input type="password" id="password" required><br><br>
-    <button type="submit">로그인</button>
-  </form>
-</body>
-</html>
