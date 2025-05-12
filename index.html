@@ -2,170 +2,64 @@
 <html lang="ko">
 <head>
   <meta charset="UTF-8">
-  <title>방 꾸미기</title>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/5.3.0/fabric.min.js"></script>
+  <title>방 꾸미기 로그인 테스트</title>
   <style>
-    body { font-family: sans-serif; }
-    #canvas-container { position: relative; margin-bottom: 10px; }
-    #c { border: 1px solid #ccc; }
-    #shop { margin-bottom: 10px; }
-    .shop-item { width: 60px; cursor: grab; margin-right: 5px; }
-    #controls { margin-bottom: 10px; }
-    #controls input, #controls button { margin-right: 5px; }
+    body { font-family: sans-serif; margin: 20px; }
+    #app { display: none; }
+    .shop-item { width: 50px; margin-right: 10px; }
+    canvas { border: 1px solid #ccc; }
   </style>
 </head>
 <body>
-  <!-- 로그인 섹션 -->
-  <div id="loginSection">
-    <h3>🔐 로그인</h3>
-    <input type="text" id="loginId" placeholder="ID">
-    <input type="password" id="loginPw" placeholder="Password">
+  <!-- 로그인 화면 -->
+  <div id="login">
+    <h2>🔐 로그인</h2>
+    <input type="text" id="idInput" placeholder="아이디"><br>
+    <input type="password" id="pwInput" placeholder="비밀번호"><br>
     <button id="loginBtn">로그인</button>
-    <p id="loginStatus"></p>
+    <p id="loginMsg" style="color:red;"></p>
   </div>
 
-  <!-- 방 꾸미기 앱 -->
-  <div id="app" style="display: none;">
-    <h2>🪑 방 꾸미기 시뮬레이터 V.0.2.5</h2>
-
-    <div id="canvas-container">
-      <canvas id="c" width="800" height="500"></canvas>
-    </div>
-
+  <!-- 앱 화면 -->
+  <div id="app">
+    <h2>🪑 방 꾸미기 시뮬레이터 V.0.2.51</h2>
     <div id="shop">
-      <h3>가구 목록</h3>
-      <img src="assets/sofa.png" class="shop-item" draggable="true" data-name="sofa">
-      <img src="assets/table.png" class="shop-item" draggable="true" data-name="table">
+      <img src="https://via.placeholder.com/50x50?text=Sofa" class="shop-item" data-src="https://via.placeholder.com/50x50?text=Sofa">
+      <img src="https://via.placeholder.com/50x50?text=Table" class="shop-item" data-src="https://via.placeholder.com/50x50?text=Table">
     </div>
-
-    <div id="controls">
-      <label>z-index: <input id="zSlider" type="range" min="1" max="100" value="10" disabled></label>
-      <button id="deleteBtn" disabled>삭제</button>
-      <button id="saveBtn">💾 저장</button>
-      <button id="loadBtn">📂 불러오기</button>
-    </div>
+    <canvas id="canvas" width="500" height="300"></canvas>
   </div>
 
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/5.3.0/fabric.min.js"></script>
   <script>
     // 로그인 로직
-    const loginSection = document.getElementById('loginSection');
-    const appSection = document.getElementById('app');
+    const loginDiv = document.getElementById('login');
+    const appDiv = document.getElementById('app');
     const loginBtn = document.getElementById('loginBtn');
-    const loginStatus = document.getElementById('loginStatus');
 
     loginBtn.addEventListener('click', () => {
-      const id = document.getElementById('loginId').value;
-      const pw = document.getElementById('loginPw').value;
-
+      const id = document.getElementById('idInput').value;
+      const pw = document.getElementById('pwInput').value;
       if (id === '1234' && pw === '1234') {
-        localStorage.setItem('userId', id);
-        loginSection.style.display = 'none';
-        appSection.style.display = 'block';
+        loginDiv.style.display = 'none';
+        appDiv.style.display = 'block';
       } else {
-        loginStatus.textContent = '❌ 로그인 실패. ID 또는 비밀번호가 잘못되었습니다.';
-        loginStatus.style.color = 'red';
+        document.getElementById('loginMsg').textContent = '❌ ID 또는 비밀번호가 틀렸습니다.';
       }
     });
 
-    // 자동 로그인 유지
-    window.addEventListener('DOMContentLoaded', () => {
-      if (localStorage.getItem('userId')) {
-        loginSection.style.display = 'none';
-        appSection.style.display = 'block';
-      }
-    });
-
-    // 방 꾸미기 로직
-    const canvas = new fabric.Canvas('c', { selection: false });
-    const zSlider = document.getElementById('zSlider');
-    const deleteBtn = document.getElementById('deleteBtn');
-    const saveBtn = document.getElementById('saveBtn');
-    const loadBtn = document.getElementById('loadBtn');
-    const flipBtn = document.createElement('button');
-    flipBtn.id = 'flipBtn';
-    flipBtn.textContent = '↔️ 반전';
-    flipBtn.disabled = true;
-    document.getElementById('controls').appendChild(flipBtn);
-
-    let activeObject = null;
+    // 캔버스 로직
+    const canvas = new fabric.Canvas('canvas', { selection: false });
 
     document.querySelectorAll('.shop-item').forEach(img => {
-      img.addEventListener('dragstart', e => {
-        e.dataTransfer.setData('name', img.dataset.name);
-      });
-    });
-
-    canvas.upperCanvasEl.addEventListener('dragover', e => e.preventDefault());
-    canvas.upperCanvasEl.addEventListener('drop', e => {
-      e.preventDefault();
-      const name = e.dataTransfer.getData('name');
-      const src = `assets/${name}.png`;
-      fabric.Image.fromURL(src, img => {
-        img.set({
-          left: e.offsetX,
-          top: e.offsetY,
-          selectable: true,
-          hasControls: true,
-          lockRotation: true,
-          lockUniScaling: false,
-          data: { name, src }
+      img.addEventListener('click', () => {
+        const src = img.dataset.src;
+        fabric.Image.fromURL(src, function(obj) {
+          obj.set({ left: 100, top: 100 });
+          canvas.add(obj);
         });
-        canvas.add(img);
-        canvas.setActiveObject(img);
-        showControls(img);
       });
     });
-
-    canvas.on('mouse:down', opts => {
-      if (opts.target) {
-        showControls(opts.target);
-      } else {
-        hideControls();
-      }
-    });
-
-    function showControls(obj) {
-      activeObject = obj;
-      zSlider.disabled = false;
-      deleteBtn.disabled = false;
-      flipBtn.disabled = false;
-      zSlider.value = canvas.getObjects().indexOf(obj) + 1;
-    }
-
-    function hideControls() {
-      activeObject = null;
-      zSlider.disabled = true;
-      deleteBtn.disabled = true;
-      flipBtn.disabled = true;
-    }
-
-    zSlider.addEventListener('input', () => {
-      if (!activeObject) return;
-      canvas.moveTo(activeObject, parseInt(zSlider.value) - 1);
-      canvas.renderAll();
-    });
-
-    deleteBtn.addEventListener('click', () => {
-      if (!activeObject) return;
-      canvas.remove(activeObject);
-      hideControls();
-    });
-
-    flipBtn.addEventListener('click', () => {
-      if (!activeObject) return;
-      activeObject.toggle('flipX');
-      canvas.renderAll();
-    });
-
-    saveBtn.addEventListener('click', () => {
-      const data = canvas.getObjects().map(obj => ({
-        name: obj.data.name,
-        src: obj.data.src,
-        left: obj.left,
-        top: obj.top,
-        scaleX: obj.scaleX || 1,
-        scaleY: obj.scaleY || 1,
-        flip: obj.flipX || false,
-        z: canvas.getObjects().indexOf(obj)
-      }));
-      localStorage.setItem('roomLayout
+  </script>
+</body>
+</html>
