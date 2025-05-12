@@ -2,7 +2,7 @@
 <html lang="ko">
 <head>
   <meta charset="UTF-8">
-  <title>방 꾸미기 V.0.2.71</title>
+  <title>방 꾸미기 V.0.2.72</title>
   <script src="https://apis.google.com/js/api.js"></script>
   <script>
     let gapiLoaded = false;  // API 로딩 상태 추적
@@ -10,19 +10,17 @@
     // 1. Google Sheets API 로딩 및 인증
     function start() {
       gapi.client.init({
-        'apiKey': 'AIzaSyBYMvVkhdniX7glIF42vV6BdPzRwL0AJJQ',  // 발급받은 API 키
-        'clientId': '710863003277-ir6c0k7hl1rstsh6bb3pkkj8ddij9hih.apps.googleusercontent.com',  // OAuth 클라이언트 ID
-        'scope': 'https://www.googleapis.com/auth/spreadsheets.readonly',
-      }).then(function() {
-        gapiLoaded = true;  // API 로드 완료
-        console.log("Google API 클라이언트가 로드되었습니다.");
-      }).catch(function(error) {
-        console.error('Google API 로드 실패:', error);
+        apiKey: 'AIzaSyBYMvVkhdniX7glIF42vV6BdPzRwL0AJJQ',  // <-- 본인의 API 키
+        discoveryDocs: ["https://sheets.googleapis.com/$discovery/rest?version=v4"],
+      }).then(() => {
+        gapiLoaded = true;
+      }).catch(e => {
+        console.error("API 로드 실패:", e);
       });
     }
 
     // 2. API 클라이언트 로드
-    gapi.load('client:auth2', start);
+    gapi.load('client', start);
 
     // 3. 로그인 함수
     function login() {
