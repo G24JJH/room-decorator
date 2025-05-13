@@ -1,5 +1,5 @@
 // --- script.js ---
-// V.0.3.21 (오류 수정)
+// V.0.3.5 - 드래그 앤 드롭 오류 수정
 
 let canvas;
 let activeObject = null;
@@ -68,8 +68,15 @@ function initUserInfo(userId) {
         img.className = 'shop-item';
         img.draggable = true;
         img.dataset.name = name;
+      
+        // ✅ dragstart 이벤트 여기서 직접 추가!
+        img.addEventListener('dragstart', e =>
+          e.dataTransfer.setData('name', img.dataset.name)
+        );
+      
         container.appendChild(img);
       });
+
 
       shop.appendChild(container);
     }
