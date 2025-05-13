@@ -1,5 +1,5 @@
 // --- script.js ---
-// V.0.3.51 - 드래그 앤 드롭 오류 수정
+// V.0.3.52 - 드래그 앤 드롭 오류 수정
 
 let canvas;
 let activeObject = null;
@@ -71,9 +71,8 @@ function initUserInfo(userId) {
       
         // ✅ dragstart 이벤트 여기서 직접 추가!
         img.addEventListener('dragstart', e =>
-          e.dataTransfer.setData('name', img.dataset.name);
           console.log('드래그 대상 name:', img.dataset.name);
-                             
+          e.dataTransfer.setData('name', img.dataset.name);
         );
       
         container.appendChild(img);
@@ -102,8 +101,8 @@ window.addEventListener('DOMContentLoaded', () => {
   document.getElementById('controls').appendChild(flipBtn);
 
   document.querySelectorAll('.shop-item').forEach(img => {
-    img.addEventListener('dragstart', e => e.dataTransfer.setData('name', img.dataset.name));
     console.log('드래그 대상2 name:', img.dataset.name);
+    img.addEventListener('dragstart', e => e.dataTransfer.setData('name', img.dataset.name));
   });
   canvas.upperCanvasEl.addEventListener('dragover', e => e.preventDefault());
   canvas.upperCanvasEl.addEventListener('drop', e => {
