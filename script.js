@@ -1,5 +1,5 @@
 // --- script.js ---
-// V.0.3.2 (웹 이름 변경, 보유 가구 추가)
+// V.0.3.21 (오류 수정)
 
 let canvas;
 let activeObject = null;
@@ -14,6 +14,9 @@ function gapiInit() {
   }).then(() => {
     gapiInited = true;
     console.log('gapi client initialized');
+
+    const userId = localStorage.getItem('userId');
+    if (userId) initUserInfo(userId);  // ✅ 초기화 후 실행
   }).catch(e => console.error('gapi client init error:', e));
 }
 
@@ -29,6 +32,46 @@ function gisInit() {
         accessToken = resp.access_token;
         console.log('Access token acquired');
       }
+    }
+  });
+}
+
+function initUserInfo(userId) {
+  gapi.client.sheets.spreadsheets.values.get({
+    spreadsheetId: '1xUDw_vkG2aS5KF0F50gGpSDgRMmdBZ2_pQc27D39_qQ',
+    range: '룸!A2:F100'
+  }).then(res => {
+    const row = (res.result.values || []).find(r => r[0] === userId);
+    if (!row) return;
+
+    // 유저명으로 제목 변경
+    if (row[2]) {
+      document.title = `${row[2]}의 방`;
+    }
+
+    // 보유 가구 표시
+    if (row[5]) {
+      let items;
+      try {
+        items = JSON.parse(row[5]);
+      } catch {
+        items = row[5].split(',').map(s => s.trim());
+      }
+
+      const shop = document.getElementById('shop');
+      const container = document.createElement('div');
+      container.style.display = 'flex';
+
+      items.forEach(name => {
+        const img = document.createElement('img');
+        img.src = `assets/${name}.png`;
+        img.className = 'shop-item';
+        img.draggable = true;
+        img.dataset.name = name;
+        container.appendChild(img);
+      });
+
+      shop.appendChild(container);
     }
   });
 }
@@ -66,38 +109,6 @@ window.addEventListener('DOMContentLoaded', () => {
   });
 
   canvas.on('mouse:down', opts => opts.target ? showControls(opts.target) : hideControls());
-  // 유저별 보유 가구만 표시
-  function showOwnedItems(userId) {
-    gapi.client.sheets.spreadsheets.values.get({
-      spreadsheetId: '1xUDw_vkG2aS5KF0F50gGpSDgRMmdBZ2_pQc27D39_qQ',
-      range: '룸!A2:F100'
-    }).then(res => {
-      const row = (res.result.values || []).find(r => r[0] === userId);
-      if (!row || !row[5]) return;
-      
-      let items;
-      try {
-        items = JSON.parse(row[5]); // ["sofa", "table"]
-      } catch {
-        items = row[5].split(',').map(s => s.trim()); // "sofa,table"
-      }
-  
-      const shop = document.getElementById('shop');
-      const container = document.createElement('div');
-      container.style.display = 'flex';
-  
-      items.forEach(name => {
-        const img = document.createElement('img');
-        img.src = `assets/${name}.png`;
-        img.className = 'shop-item';
-        img.draggable = true;
-        img.dataset.name = name;
-        container.appendChild(img);
-      });
-  
-      shop.appendChild(container);
-    });
-  }
 
   function showControls(obj) {
     activeObject = obj;
@@ -187,16 +198,6 @@ window.addEventListener('DOMContentLoaded', () => {
     if (!userId) return alert('로그인이 필요합니다.');
 
     gapi.client.sheets.spreadsheets.values.get({
-    spreadsheetId: '1xUDw_vkG2aS5KF0F50gGpSDgRMmdBZ2_pQc27D39_qQ',
-    range: '룸!A2:C100'
-  }).then(res => {
-    const row = (res.result.values || []).find(r => r[0] === userId);
-    if (row && row[2]) {
-      document.title = `${row[2]}의 방`;
-    }
-  });
-
-    gapi.client.sheets.spreadsheets.values.get({
       spreadsheetId: '1xUDw_vkG2aS5KF0F50gGpSDgRMmdBZ2_pQc27D39_qQ',
       range: '룸!A2:D100'
     }).then(res => {
@@ -235,7 +236,4 @@ window.addEventListener('DOMContentLoaded', () => {
     });
   });
   const userId = localStorage.getItem('userId');
-  if (userId) {
-    showOwnedItems(userId);
-  }
 });
